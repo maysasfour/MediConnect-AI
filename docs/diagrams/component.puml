@@ -1,0 +1,65 @@
+@startuml MediConnect-Components
+title MediConnect AI — Modular Monolith Components
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+package "Frontend (React/TS)" {
+  [React SPA\n(i18n AR/EN, RTL, MUI)] as SPA
+}
+
+cloud "Providers (abstracted)" {
+  [AI Model Provider] as AIP
+  [Email / SMS / WhatsApp] as MSG
+}
+
+package "Backend (Spring Boot, Java 21)" {
+  [shared\n(errors, tenancy, security, correlation)] as SHARED
+  [identity\n(JWT, refresh rotation, RBAC)] as ID
+  [clinic] as CLINIC
+  [patient] as PAT
+  [scheduling\n(double-booking safe)] as SCHED
+  [medicalrecord\n(sign/amend)] as EMR
+  [prescription] as RX
+  [notification] as NOTIF
+  [aiassistant\n(guarded triage)] as AI
+  [analytics] as ANL
+  [audit] as AUD
+  [privacy\n(consent, DPO)] as PRIV
+}
+
+database "PostgreSQL\n(Flyway)" as PG
+database "Redis" as RD
+
+SPA --> ID : /api/v1 (Bearer JWT)
+SPA --> SCHED
+SPA --> AI
+
+ID ..> SHARED
+CLINIC ..> SHARED
+PAT ..> SHARED
+SCHED ..> SHARED
+EMR ..> SHARED
+RX ..> SHARED
+NOTIF ..> SHARED
+AI ..> SHARED
+ANL ..> SHARED
+AUD ..> SHARED
+PRIV ..> SHARED
+
+AI --> AIP : minimized, de-identified
+NOTIF --> MSG
+
+ID --> PG
+PAT --> PG
+SCHED --> PG
+EMR --> PG
+RX --> PG
+NOTIF --> PG
+AI --> PG
+AUD --> PG
+PRIV --> PG
+
+ID --> RD : rate limit / tokens
+NOTIF --> RD : idempotency
+@enduml

@@ -1,0 +1,32 @@
+@startuml MediConnect-Booking
+title Appointment Booking — Double-Booking-Safe (concurrent requests)
+
+actor "Client A" as A
+actor "Client B" as B
+participant "BookingService" as S
+database "PostgreSQL" as DB
+
+== Idempotent create ==
+A -> S : book(..., Idempotency-Key=k)
+S -> DB : findByIdempotencyKey(k)
+alt key already used
+  DB --> S : existing appointment
+  S --> A : 200 (original booking)
+else new
+  DB --> S : none
+  S -> DB : existsOverlapping(doctor, start, end, active)
+  DB --> S : false
+  S -> DB : saveAndFlush(appointment)   ' unique index (doctor,start) for active
+  DB --> S : ok
+  S --> A : 201 Created
+end
+
+== Race for the same slot ==
+A -> S : book(doctor D, 10:00)
+B -> S : book(doctor D, 10:00)
+S -> DB : (A) saveAndFlush
+DB --> S : ok
+S -> DB : (B) saveAndFlush
+DB --> S : DataIntegrityViolation (unique index)
+S --> B : 409 Conflict (slot no longer available)
+@enduml

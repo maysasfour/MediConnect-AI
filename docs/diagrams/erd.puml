@@ -1,0 +1,133 @@
+@startuml MediConnect-ERD
+title MediConnect AI — Core Entity Relationships (abridged)
+hide circle
+skinparam linetype ortho
+
+entity Clinic {
+  * id : UUID
+  --
+  name_en / name_ar
+  timezone
+}
+entity Branch {
+  * id : UUID
+  --
+  clinic_id : UUID
+}
+entity Department {
+  * id : UUID
+  --
+  clinic_id : UUID
+  branch_id : UUID
+}
+entity UserAccount {
+  * id : UUID
+  --
+  clinic_id : UUID (nullable)
+  email (unique)
+  password_hash
+  roles
+}
+entity RefreshToken {
+  * id : UUID
+  --
+  user_id : UUID
+  token_hash (unique)
+  family_id
+}
+entity Patient {
+  * id : UUID
+  --
+  clinic_id : UUID
+  medical_record_number
+  national_id / passport
+}
+entity Appointment {
+  * id : UUID
+  --
+  clinic_id : UUID
+  doctor_id / patient_id
+  start_time / end_time
+  status
+  idempotency_key (unique)
+}
+entity AppointmentStatusHistory {
+  * id : UUID
+  --
+  appointment_id : UUID
+  from_status / to_status
+}
+entity Encounter {
+  * id : UUID
+  --
+  clinic_id / patient_id
+}
+entity ClinicalNote {
+  * id : UUID
+  --
+  clinic_id / encounter_id
+  status (DRAFT/SIGNED/AMENDED)
+  signed_by / signed_at
+}
+entity ClinicalNoteAmendment {
+  * id : UUID
+  --
+  note_id : UUID
+  author_id / reason
+}
+entity Prescription {
+  * id : UUID
+  --
+  clinic_id / encounter_id
+}
+entity PrescriptionItem {
+  * id : UUID
+  --
+  prescription_id : UUID
+}
+entity AIConversation {
+  * id : UUID
+  --
+  clinic_id / patient_id
+  consent_granted
+}
+entity AISymptomSummary {
+  * id : UUID
+  --
+  conversation_id : UUID
+  doctor_review_status
+}
+entity Consent {
+  * id : UUID
+  --
+  patient_id / notice_version
+}
+entity PrivacyRequest {
+  * id : UUID
+  --
+  patient_id / type / status
+}
+entity AuditLog {
+  * id : UUID
+  --
+  actor_id / action / target
+}
+
+Clinic ||--o{ Branch
+Clinic ||--o{ Department
+Branch ||--o{ Department
+Clinic ||--o{ UserAccount
+UserAccount ||--o{ RefreshToken
+Clinic ||--o{ Patient
+Patient ||--o{ Appointment
+Appointment ||--o{ AppointmentStatusHistory
+Patient ||--o{ Encounter
+Encounter ||--o{ ClinicalNote
+ClinicalNote ||--o{ ClinicalNoteAmendment
+Encounter ||--o{ Prescription
+Prescription ||--o{ PrescriptionItem
+Patient ||--o{ AIConversation
+AIConversation ||--o{ AISymptomSummary
+Patient ||--o{ Consent
+Patient ||--o{ PrivacyRequest
+@enduml

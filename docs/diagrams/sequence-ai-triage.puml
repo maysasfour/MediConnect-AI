@@ -1,0 +1,41 @@
+@startuml MediConnect-AI-Triage
+title AI Symptom Assistant — Safety Pipeline (one turn)
+
+actor Patient
+participant "AI Controller" as C
+participant "SymptomTriageService" as T
+participant "RedFlagDetector" as RF
+participant "PromptSanitizer" as PS
+participant "AiModelProvider\n(mock/real)" as P
+
+Patient -> C : POST /ai/conversations/{id}/messages
+C -> T : assess(consent, message, lang, priorTurns)
+
+alt no consent
+  T --> C : 403 ForbiddenOperation
+  C --> Patient : consent required
+else consent granted
+  T -> RF : detect(message)
+  alt red flag (emergency)
+    RF --> T : RedFlag(category)
+    note right of T : Model is NEVER called
+    T --> C : EMERGENCY result + guidance
+    C --> Patient : Emergency interrupt (call 911)
+  else no red flag
+    RF --> T : none
+    T -> PS : sanitizeInput(message)
+    PS --> T : wrapped text (+injection flag)
+    T -> P : analyzeSymptoms(minimized, de-identified)
+    P --> T : ModelResponse
+    T -> PS : isOutputSafe(assistantMessage)
+    alt output diagnoses/prescribes
+      PS --> T : false
+      T -> T : replace with safe fallback
+    else safe
+      PS --> T : true
+    end
+    T --> C : care level, specialty, follow-ups,\nneutral summary (PENDING_REVIEW)
+    C --> Patient : informational response
+  end
+end
+@enduml
