@@ -1,0 +1,64 @@
+{
+  "app": {
+    "name": "MediConnect AI",
+    "tagline": "Clinic management and informational care navigation"
+  },
+  "nav": {
+    "home": "Home",
+    "doctors": "Doctors",
+    "specialties": "Specialties",
+    "login": "Log in",
+    "register": "Register",
+    "assistant": "Symptom assistant"
+  },
+  "language": {
+    "switchToArabic": "العربية",
+    "switchToEnglish": "English"
+  },
+  "landing": {
+    "heroTitle": "Better care coordination for private clinics in Jordan",
+    "heroSubtitle": "Appointments, medical records, prescriptions and an informational AI symptom assistant — bilingual and accessible.",
+    "cta": "Book an appointment",
+    "aiCta": "Try the symptom assistant"
+  },
+  "login": {
+    "title": "Log in to your account",
+    "email": "Email address",
+    "password": "Password",
+    "submit": "Log in",
+    "errorSummaryTitle": "There is a problem",
+    "invalidEmail": "Enter a valid email address",
+    "passwordRequired": "Enter your password"
+  },
+  "assistant": {
+    "title": "Symptom information assistant",
+    "consentTitle": "Before you begin",
+    "consentBody": "This assistant provides general health information and helps you decide what kind of care may be appropriate. It does not diagnose conditions and does not prescribe medication. To continue, please consent to processing the symptoms you describe.",
+    "consentAccept": "I understand and consent",
+    "consentDecline": "Not now",
+    "inputLabel": "Describe your symptoms",
+    "send": "Send",
+    "disclaimerShort": "Informational only — not a diagnosis and not a prescription.",
+    "deleteConversation": "Delete this conversation"
+  },
+  "emergency": {
+    "title": "This may be an emergency",
+    "body": "Based on what you described, please seek immediate help. Call emergency services (911 in Jordan) or go to the nearest emergency department now.",
+    "call": "Call 911"
+  },
+  "careLevel": {
+    "EMERGENCY": "Emergency",
+    "URGENT_SAME_DAY": "Urgent — same day",
+    "ROUTINE_APPOINTMENT": "Routine appointment",
+    "GENERAL_INFORMATION": "General information"
+  },
+  "aiDisclaimer": {
+    "title": "About the AI symptom assistant",
+    "point1": "It provides information and care-navigation support only.",
+    "point2": "It never diagnoses a disease.",
+    "point3": "It never prescribes or recommends specific medication.",
+    "point4": "Emergency warning signs will interrupt the chat and direct you to urgent care.",
+    "point5": "Any summary is reviewed by a doctor before it can enter your medical record.",
+    "point6": "You can delete your assistant conversation at any time."
+  }
+}

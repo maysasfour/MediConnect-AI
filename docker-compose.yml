@@ -1,0 +1,66 @@
+# MediConnect AI — local/demo stack.
+# Secrets here are DEMO ONLY. In any real deployment supply them via a secret
+# manager or an untracked .env file (see deployment guide in docs/).
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: mediconnect
+      POSTGRES_USER: mediconnect
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-mediconnect}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mediconnect -d mediconnect"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "6379:6379"
+
+  backend:
+    build:
+      context: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/mediconnect
+      DB_USERNAME: mediconnect
+      DB_PASSWORD: ${DB_PASSWORD:-mediconnect}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production-min-32-bytes-secret-value}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:8081}
+      AI_PROVIDER: mock
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health/readiness"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    build:
+      context: ./frontend
+    depends_on:
+      - backend
+    ports:
+      - "8081:80"
+
+volumes:
+  db-data:
