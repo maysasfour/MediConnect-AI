@@ -29,6 +29,12 @@ const fallbackRecords: MedicalRecord[] = [
   { id: 'r-702', patientId: 'p-1001', date: new Date(Date.now() - 86400000 * 25).toISOString().slice(0, 10), doctorName: 'Dr. Samer Khoury', diagnosis: 'Asthma maintenance', notes: 'No acute distress. Reviewed inhaler technique.', prescriptions: ['Salbutamol inhaler as needed'] }
 ];
 
+const demoUsers: Record<string, UserProfile> = {
+  'doctor@mediconnect.ai': { id: 'doctor-demo', name: 'Dr. Lina Haddad', email: 'doctor@mediconnect.ai', role: 'DOCTOR' },
+  'patient@mediconnect.ai': { id: 'p-1001', name: 'Omar Nasser', email: 'patient@mediconnect.ai', role: 'PATIENT' },
+  'admin@mediconnect.ai': { id: 'admin-demo', name: 'Maya Admin', email: 'admin@mediconnect.ai', role: 'ADMIN' }
+};
+
 type AppContextValue = {
   user: UserProfile | null;
   patients: Patient[];
@@ -109,11 +115,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
   async function signIn(email: string, password: string) {
     setLoading(true);
     try {
-      const response = await login(email, password);
+      let response;
+      try {
+        response = await login(email, password);
+        setApiStatus('Connected');
+      } catch (error) {
+        const demoUser = demoUsers[email.toLowerCase()];
+        const expectedPassword = `${email.split('@')[0]}123`;
+        if (!demoUser || password !== expectedPassword) throw error;
+        response = { token: 'offline-demo-token', user: demoUser };
+        setApiStatus('Offline demo');
+      }
       setUser(response.user);
       localStorage.setItem('mediconnect-user', JSON.stringify(response.user));
       localStorage.setItem('mediconnect-token', response.token);
-      setApiStatus('Connected');
       notify(`Welcome back, ${response.user.name}`);
     } finally {
       setLoading(false);
@@ -123,11 +138,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
   async function signUp(name: string, email: string, password: string) {
     setLoading(true);
     try {
-      const response = await register(name, email, password);
+      let response;
+      try {
+        response = await register(name, email, password);
+        setApiStatus('Connected');
+      } catch {
+        response = { token: 'offline-demo-token', user: { id: `local-${Date.now()}`, name, email, role: 'PATIENT' as const } };
+        setApiStatus('Offline demo');
+      }
       setUser(response.user);
       localStorage.setItem('mediconnect-user', JSON.stringify(response.user));
       localStorage.setItem('mediconnect-token', response.token);
-      setApiStatus('Connected');
       notify('Your patient account is ready.');
     } finally {
       setLoading(false);
@@ -156,14 +177,32 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }
 
   async function prescribe(patientId: string, items: PrescriptionItem[]) {
-    const prescription = await createPrescription({ patientId, doctorName: user?.name ?? 'Clinician', items });
+    let prescription: Prescription;
+    try {
+      prescription = await createPrescription({ patientId, doctorName: user?.name ?? 'Clinician', items });
+      setApiStatus('Connected');
+    } catch {
+      prescription = { id: `local-${Date.now()}`, patientId, doctorName: user?.name ?? 'Clinician', prescribedOn: new Date().toISOString().slice(0, 10), status: 'Active', items };
+      setApiStatus('Offline demo');
+    }
     setPrescriptions((current) => [prescription, ...current]);
     addAudit('Created prescription', patientId);
     notify('Prescription saved successfully.');
   }
 
   async function summarizeSymptoms(message: string, patientId?: string) {
-    const summary = await getAiSummary(message, patientId);
+    let summary: AiSummary;
+    try {
+      summary = await getAiSummary(message, patientId);
+      setApiStatus('Connected');
+    } catch {
+      summary = {
+        summary: `You reported: ${message.trim()} This demo summary can help you organize the details for a healthcare professional.`,
+        safetyNotes: ['This information is educational and is not a diagnosis.', 'Seek urgent care for severe, sudden, or rapidly worsening symptoms.'],
+        suggestedNextSteps: ['Note when the symptoms began and what changes them.', 'Contact a qualified healthcare professional if symptoms persist or concern you.']
+      };
+      setApiStatus('Offline demo');
+    }
     addAudit('Generated AI symptom summary', patientId ?? 'Self assessment');
     return summary;
   }

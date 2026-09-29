@@ -9,6 +9,8 @@ seeded database scripts, and Docker wiring.
 The backend serves seeded in-memory data so the complete workflow can be
 shown immediately without requiring external infrastructure.
 
+Live website: https://maysasfour.github.io/MediConnect-AI/
+
 ## Main Features
 
 - Patient registration
