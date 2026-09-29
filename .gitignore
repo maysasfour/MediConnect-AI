@@ -13,6 +13,9 @@ backend/target/
 *.class
 *.jar
 *.war
+.m2/
+.tools/
+.maven-settings.xml
 .idea/
 *.iml
 

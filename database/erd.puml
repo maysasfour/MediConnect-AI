@@ -1,0 +1,43 @@
+@startuml
+entity patients {
+  * id : text
+  --
+  full_name : text
+  age : integer
+  gender : text
+  phone : text
+  risk_level : text
+}
+
+entity appointments {
+  * id : text
+  --
+  patient_id : text
+  doctor_name : text
+  starts_at : timestamp
+  visit_type : text
+  status : text
+}
+
+entity medical_records {
+  * id : text
+  --
+  patient_id : text
+  record_date : date
+  doctor_name : text
+  diagnosis : text
+  notes : text
+}
+
+entity audit_logs {
+  * id : bigserial
+  --
+  actor : text
+  action : text
+  resource : text
+  created_at : timestamp
+}
+
+patients ||--o{ appointments
+patients ||--o{ medical_records
+@enduml
