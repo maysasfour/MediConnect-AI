@@ -11,6 +11,9 @@ shown immediately without requiring external infrastructure.
 
 Live website: https://maysasfour.github.io/MediConnect-AI/
 
+The frontend is also ready for one-click deployment on Vercel using the root
+`vercel.json` configuration.
+
 ## Main Features
 
 - Patient registration
