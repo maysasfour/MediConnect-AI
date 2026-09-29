@@ -47,3 +47,5 @@ uploads/
 # Database volumes
 postgres-data/
 redis-data/
+
+.vercel

@@ -11,6 +11,8 @@ shown immediately without requiring external infrastructure.
 
 Live website: https://maysasfour.github.io/MediConnect-AI/
 
+Vercel deployment: https://mediconnect-ai-eta.vercel.app/
+
 The frontend is also ready for one-click deployment on Vercel using the root
 `vercel.json` configuration.
 
